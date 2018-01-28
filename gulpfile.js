@@ -4,7 +4,9 @@ postcss = require('gulp-postcss'),
 autoprefixer = require('autoprefixer'),
 cssvars = require('postcss-simple-vars'),
 nested = require('postcss-nested'),
-cssImport = require('postcss-import');
+cssImport = require('postcss-import'),
+browserSync = require('browser-sync').create();
+
 
 gulp.task('default', function() {
     console.log('Hooray, you create a gulp task');
@@ -21,13 +23,22 @@ gulp.task('styles', function() {
 });
 
 gulp.task('watch', function() {
+
+    browserSync.init({
+        notify: false,
+        server: "app"
+    });
+
     watch('./app/index.html', function() {
-        gulp.start('html');
+        browserSync.reload();
+    });
+
+    watch('./app/assets/styles/**/*.css', function() {
+        gulp.start('cssInject');
     });
 });
 
-gulp.task('watch', function() {
-    watch('./app/assets/styles/**/*.css', function() {
-        gulp.start('styles');
-    })
-})
+gulp.task('cssInject', ['styles'],function() {
+    return gulp.src('./app/temp//styles/styles.css')
+        .pipe(browserSync.stream());
+});
